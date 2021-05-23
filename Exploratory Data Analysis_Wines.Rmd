@@ -1,0 +1,274 @@
+---
+title: "Exploratory Data Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# Univariate Plots Section
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+data = read_csv("Redwine.csv")
+data <- within(data, {
+  quality <- ordered(quality)
+})
+dim(data)
+```
+
+
+```{r}
+str(data)
+```
+
+
+```{r}
+summary(data)
+```
+Our dataset has 12 variables with 1599 observations.
+
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+ggplot(data, aes(x = alcohol)) +
+    geom_histogram()
+```
+Most wines have an alcohol percentage of between 9 to 11%.
+
+```{r}
+summary(data$alcohol)
+```
+
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = pH)) +
+    geom_histogram()
+```
+Most cars have a pH of between 3.0 to 3.5.
+
+```{r}
+summary(data$pH)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = residual.sugar)) +
+    geom_histogram()
+```
+
+
+```{r}
+summary(data$residual.sugar)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = chlorides)) +
+    geom_histogram()
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = volatile.acidity)) +
+    geom_histogram()
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = density)) +
+    geom_histogram()
+```
+
+
+```{r}
+ggplot(data, aes(x = quality)) +
+    geom_bar()
+```
+Most wines had a quality of 5 and 6.
+
+
+# Univariate Analysis
+## What is the structure of your dataset?
+There are 1599 observations in our dataset with 12 variables (fixed acidity, volatile acidity, citric acidity, residual sugar, chlorides, free sulphur dioxide, total sulphur dioxide, density, pH, sulphates, alcohol, quality). The categorical variable is quality.
+
+Other observations:
+
+* Majority of wines have a density of between 0.995 and 1.000.
+
+* Most wines have a volatile acidity of less than 0.8 g/dm^3 hence they have pleasant taste.
+
+* Most wines have a small amount of salt less than 0.2 g/dm^3.
+
+* The mean alcohol percentage of the wines is 10%.
+
+## What is the main feature of interest in your dataset?
+The main feature of interest in this dataset is quality which is the quality level of the wine. I want to know which features of wine influence quality and can be used to predict the quality level of a wine.
+
+## What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+Alcohol, pH, residual sugar, chlorides, and fixed acidity are features that may influence fuel consumption of a car. 
+
+
+# Bivariate Plots Section
+```{r}
+df <- data[, c(-12)]
+rs = cor(df)
+round(rs, 2)
+```
+
+
+```{r}
+library(corrplot)
+corrplot(rs, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45)
+```
+
+
+```{r}
+ggplot(data, aes(fixed.acidity, citric.acid)) +
+    geom_point()
+```
+
+
+```{r}
+ggplot(data, aes(fixed.acidity, density)) +
+    geom_point() 
+```
+
+
+```{r}
+ggplot(data, aes(pH, fixed.acidity)) +
+    geom_point()
+```
+
+
+```{r}
+ggplot(data, aes(volatile.acidity, citric.acid)) +
+    geom_point()
+```
+
+
+```{r}
+ggplot(data, aes(quality,alcohol)) +
+    geom_boxplot() +
+    labs(x = "quality",
+         y = "alcohol")
+```
+
+
+```{r}
+ggplot(data, aes(quality,pH)) +
+    geom_boxplot() +
+    labs(x = "quality",
+         y = "pH")
+```
+
+
+```{r}
+ggplot(data, aes(quality,residual.sugar)) +
+    geom_boxplot() +
+    labs(x = "quality",
+         y = "residual.sugar")
+```
+
+
+```{r}
+ggplot(data, aes(quality,volatile.acidity)) +
+    geom_boxplot() +
+    labs(x = "quality",
+         y = "volatile.acidity")
+```
+
+
+# Bivariate Analysis
+## Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+The negative relationship between pH and citric was interesting. Another interesting relationship was the negative relationship between citric acid and volatile acidity.
+
+
+## What were the strongest relationships you found?
+There was a strong relationships between fixed acidity and citric acid, fixed acidity and density, and free sulphur dioxide and total sulphur dioxide. 
+
+
+# Multivariate Plots Section
+```{r}
+ggplot(data = data, mapping = aes(x = alcohol, y = ..density..)) +
+  geom_freqpoly(mapping = aes(colour = quality), binwidth = 0.3)
+```
+
+
+```{r}
+ggplot(data = data, mapping = aes(x = pH, y = ..density..)) +
+  geom_freqpoly(mapping = aes(colour = quality), binwidth = 0.1)
+```
+
+
+```{r}
+ggplot(data = data, mapping = aes(x = residual.sugar, y = ..density..)) +
+  geom_freqpoly(mapping = aes(colour = quality), binwidth = 0.2)
+```
+
+
+```{r}
+mlp <- ggplot(data, aes(x=pH,y=citric.acid/pH)) + geom_point(shape=1)
+mlp + facet_grid(quality~ .)
+```
+
+
+# Multivariate Analysis
+## Talk about some of the relationships you observed in this part of the investigation.
+Wines with a moderate pH have a low citric acid/pH rate. Wines with quality level have a high alcohol level compared to the rest. Wines with quality level of 3 and 8 have a high residual sugar.  
+
+
+# Final Plots and Summary
+## Plot One
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = residual.sugar)) +
+    geom_histogram() +
+   labs(title = "Distribution of Residual",
+        x = "Residual sugar",
+        y = "Number of wines") + 
+   theme_minimal()
+```
+
+## Description One
+The distribution of residual sugar of the wines seem to skew to the right. Most wines have a residual sugar of below 4 g/dm^3.
+
+## Plot Two
+```{r}
+ggplot(data, aes(quality,alcohol)) +
+    geom_boxplot() +
+    labs(title = "Quality of wines by alcohol",
+         x = "quality",
+         y = "alcohol")
+```
+
+
+## Description Two
+Wines with quality level of 5 had a low median alcohol percentage. But some wines with quality level of 5 seemed to have high alcohol percentage hence appearing as outliers. Wines with quality level of 8 have a high median alcohol percentage.
+
+
+## Plot Three
+```{r}
+ggplot(data = data, mapping = aes(x = pH, y = ..density..)) +
+  geom_freqpoly(mapping = aes(colour = quality), binwidth = 0.1) +
+  labs(title = "Quality of wine by pH",
+         x = "pH") +
+   theme_minimal()
+```
+
+## Description Three
+Wines with quality level of 8 generally had a low pH compared to wines of other quality levels. The wines with quality level of 8 also had a wide distribution of pH compare to the other levels.
+
+
+# Reflection
+
+The wineQualityReds dataset contained information of about 1599 wines. The dataset comprises of information about wines and their features. I did some exploration to understand the variables in the dataset. I explored relationship between the quality of wines with other variables.
+
+There was a good relationship between the fixed acidity and citric acid. A moderate relationship was also observed between fixed acidity and density The surprising thing was that pH and citric acid had a negative correlation despite them being closely related.
+
+The limitation of this dataset is it had red wines observations only. The dataset did not also include other types of wines wich as white wine. Give the dataset contains data from 2009 the analysis of wines would not reflect on the wines produced from 2010 to 2021.
+
+
+
